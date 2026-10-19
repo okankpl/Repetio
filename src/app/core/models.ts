@@ -47,6 +47,11 @@ export interface ChoiceQuestion {
 export type StudyItem = Flashcard | ChoiceQuestion;
 export type StudyKind = StudyItem['kind'];
 
+/** Der Text, mit dem eine Einheit in Listen erscheint: Vorderseite bzw. Frage */
+export function itemTitle(item: StudyItem): string {
+  return item.kind === 'flashcard' ? item.front : item.question;
+}
+
 /** Alle Inhalte der App – so werden sie gespeichert und exportiert */
 export interface Library {
   subjects: Subject[];

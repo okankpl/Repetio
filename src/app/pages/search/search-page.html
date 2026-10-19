@@ -22,19 +22,16 @@
     }
   </h2>
   @if (results().length > 0) {
-    <ul class="card list results">
-      @for (result of results(); track result.item.id) {
+    <ul class="card list">
+      @for (result of results(); track result.id) {
         <li>
-          <a class="result" [routerLink]="result.link">
-            <span class="body">
-              <span class="text">{{ result.text }}</span>
-              <small>
-                {{ result.item.kind === 'flashcard' ? 'Karteikarte' : 'Quiz' }} ·
-                {{ result.context }}
-              </small>
-            </span>
-            <span class="status">{{ result.status }}</span>
-          </a>
+          <app-item-row
+            [link]="result.link"
+            [text]="result.text"
+            [detail]="result.detail"
+            [pill]="result.status"
+            [tone]="result.tone"
+          />
         </li>
       }
     </ul>

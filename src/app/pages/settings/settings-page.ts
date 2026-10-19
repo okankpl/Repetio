@@ -4,6 +4,7 @@ import { LearningStore } from '../../core/learning/learning-store';
 import { LibraryStore } from '../../core/library/library-store';
 import { parseBackup } from '../../core/persistence/backup';
 import { Settings, SettingsData, Theme } from '../../core/settings';
+import { FileButton } from '../../shared/file-button/file-button';
 import { PageHeader } from '../../shared/page-header/page-header';
 
 type LimitKey = keyof Pick<SettingsData, 'newFlashcardsPerDay' | 'newQuestionsPerDay'>;
@@ -14,7 +15,7 @@ const STORAGE_LIMIT_BYTES = 5 * 1024 * 1024;
 /** Einstellungen: Lernverhalten, Design, Datensicherheit (Sicherung, Speicher) und Zurücksetzen. */
 @Component({
   selector: 'app-settings-page',
-  imports: [PageHeader],
+  imports: [PageHeader, FileButton],
   templateUrl: './settings-page.html',
   styleUrl: './settings-page.css',
 })
@@ -69,11 +70,7 @@ export class SettingsPage {
     if (await this.dataSafety.exportBackup()) this.message.set('Sicherung erstellt.');
   }
 
-  protected async importBackup(input: HTMLInputElement): Promise<void> {
-    const file = input.files?.[0];
-    input.value = ''; // dieselbe Datei soll sich später erneut auswählen lassen
-    if (!file) return;
-
+  protected async importBackup(file: File): Promise<void> {
     try {
       const backup = parseBackup(await file.text());
       const date = new Date(backup.exportedAt).toLocaleString('de-DE');

@@ -48,35 +48,13 @@
   </nav>
 </header>
 
-@if (dataSafety.reminderDue() && !reminderDismissed()) {
-  <section class="card reminder" aria-labelledby="reminder-title">
-    <h2 id="reminder-title">
-      @if (dataSafety.daysSinceBackup() === null) {
-        Noch keine Sicherung
-      } @else {
-        Letzte Sicherung vor {{ dataSafety.daysSinceBackup() }} Tagen
-      }
-    </h2>
-    <p>Dein Lernstand liegt nur auf diesem Gerät. Eine Sicherung schützt ihn vor Verlust.</p>
-    <div class="button-row">
-      <button class="btn btn-primary" (click)="backupNow()">Jetzt sichern</button>
-      <button class="btn btn-secondary" (click)="reminderDismissed.set(true)">Später</button>
-    </div>
-  </section>
-}
+<!-- Erscheint nur, wenn eine Sicherung fällig ist -->
+<app-backup-reminder />
 
 <app-study-card heading="Heute" startLabel="Tägliche Runde starten" [overview]="today()" />
 
-@if (streak(); as streak) {
-  <a class="card streak" routerLink="/statistik">
-    <span class="streak-number">{{ streak.days }}</span>
-    <span class="streak-text">
-      <strong>{{ streak.days === 1 ? 'Tag' : 'Tage' }} in Folge gelernt</strong>
-      <small>heute {{ streak.reviewsToday }} Antworten · zur Statistik</small>
-    </span>
-    <span class="chevron" aria-hidden="true">›</span>
-  </a>
-}
+<!-- Erscheint erst, wenn schon einmal gelernt wurde -->
+<app-streak-card />
 
 <h2 class="section-title">Fächer</h2>
 @if (message()) {
@@ -87,7 +65,7 @@
     <!-- @for wiederholt die Zeile für jedes Fach; track sagt Angular, woran es Einträge wiedererkennt -->
     @for (entry of subjects(); track entry.subject.id) {
       <app-progress-row
-        [link]="['/fach', entry.subject.id]"
+        [link]="entry.link"
         [title]="entry.subject.name"
         [badge]="initial(entry.subject.name)"
         [detail]="entry.chapterCount + ' Kapitel'"
@@ -112,17 +90,7 @@
   } @else {
     <div class="button-row">
       <button class="btn btn-secondary" (click)="creating.set(true)">+ Neues Fach</button>
-      <!-- Ein <label> öffnet beim Antippen das zugehörige, unsichtbare Datei-Feld -->
-      <label class="btn btn-secondary">
-        Fach aus Datei
-        <input
-          #file
-          class="visually-hidden"
-          type="file"
-          accept="application/json,.json"
-          (change)="addFromFile(file)"
-        />
-      </label>
+      <app-file-button label="Fach aus Datei" (picked)="addFromFile($event)" />
     </div>
   }
 </div>

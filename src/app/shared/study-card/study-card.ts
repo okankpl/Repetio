@@ -1,7 +1,9 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { studyQueryParams } from '../../app.links';
 import { StudyOverview } from '../../core/learning/learning-store';
 import { StudyScope } from '../../core/models';
+import { Figure, KeyFigures } from '../key-figures/key-figures';
 
 /**
  * Karte mit den Kennzahlen eines Lernumfangs (fällig / neue Karten / Quizfragen)
@@ -9,24 +11,11 @@ import { StudyScope } from '../../core/models';
  */
 @Component({
   selector: 'app-study-card',
-  imports: [RouterLink],
+  imports: [RouterLink, KeyFigures],
   template: `
     <section class="card">
       <h2>{{ heading() }}</h2>
-      <dl class="stats">
-        <div>
-          <dt>fällig</dt>
-          <dd>{{ overview().due }}</dd>
-        </div>
-        <div>
-          <dt>neue Karten</dt>
-          <dd>{{ overview().newFlashcards }}</dd>
-        </div>
-        <div>
-          <dt>Quizfragen</dt>
-          <dd>{{ overview().newQuestions }}</dd>
-        </div>
-      </dl>
+      <app-key-figures class="figures" [figures]="figures()" />
       @if (pending() > 0) {
         <!-- [queryParams] hängt ?fach=…&kapitel=… an die Adresse an -->
         <a class="btn btn-primary btn-block" routerLink="/lernen" [queryParams]="queryParams()">
@@ -43,30 +32,9 @@ import { StudyScope } from '../../core/models';
     h2 {
       font-size: 18px;
     }
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+    .figures {
+      display: block;
       margin: 14px 0 18px;
-    }
-    .stats div {
-      display: flex;
-      flex-direction: column-reverse; /* Zahl oben, Beschriftung darunter */
-      align-items: center;
-      padding: 10px 4px;
-      background: var(--surface-muted);
-      border-radius: var(--radius-sm);
-    }
-    dd {
-      margin: 0;
-      font-size: 26px;
-      font-weight: 700;
-      font-variant-numeric: tabular-nums;
-    }
-    dt {
-      font-size: 13px;
-      color: var(--muted);
-      text-align: center;
     }
   `,
 })
@@ -77,15 +45,20 @@ export class StudyCard {
   readonly scope = input<StudyScope>({});
   readonly startLabel = input('Lernen starten');
 
+  protected readonly figures = computed<Figure[]>(() => {
+    const { due, newFlashcards, newQuestions } = this.overview();
+    return [
+      { label: 'fällig', value: due },
+      { label: 'neue Karten', value: newFlashcards },
+      { label: 'Quizfragen', value: newQuestions },
+    ];
+  });
+
   /** Wie viele Einheiten die Runde jetzt hätte */
   protected readonly pending = computed(() => {
     const overview = this.overview();
     return overview.due + overview.newFlashcards + overview.newQuestions;
   });
 
-  /** Nur gesetzte Werte übernehmen, damit die Adresse kein "?fach=undefined" enthält */
-  protected readonly queryParams = computed(() => {
-    const { subjectId, chapterId } = this.scope();
-    return { ...(subjectId && { fach: subjectId }), ...(chapterId && { kapitel: chapterId }) };
-  });
+  protected readonly queryParams = computed(() => studyQueryParams(this.scope()));
 }

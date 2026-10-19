@@ -1,36 +1,37 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { itemLink } from '../../app.links';
 import { Clock } from '../../core/clock';
 import { addDays, dayKey } from '../../core/dates';
 import { EMPTY_DAY } from '../../core/learning/activity';
 import { LearningStore } from '../../core/learning/learning-store';
 import { CardState } from '../../core/learning/srs';
 import {
-  MATURITY_LABELS,
-  Maturity,
   accuracy,
   activityHistory,
-  countByMaturity,
   currentStreak,
   dueForecast,
   formatDuration,
+  maturityShares,
   sumDays,
 } from '../../core/learning/statistics';
 import { LibraryStore } from '../../core/library/library-store';
-import { StudyItem } from '../../core/models';
+import { itemTitle } from '../../core/models';
 import { Bar, BarChart } from '../../shared/bar-chart/bar-chart';
+import { ItemRow } from '../../shared/item-row/item-row';
+import { Figure, KeyFigures } from '../../shared/key-figures/key-figures';
 import { PageHeader } from '../../shared/page-header/page-header';
+import { SegmentOption, SegmentedControl } from '../../shared/segmented-control/segmented-control';
+import { MaturityOverview, MaturityRow } from './maturity-overview/maturity-overview';
 
-/** Wählbare Zeiträume für den Verlauf */
-const RANGES = [14, 30] as const;
-type Range = (typeof RANGES)[number];
-
+/** Wählbare Zeiträume für Verlauf und Kennzahlen, in Tagen */
+const RANGES: SegmentOption<number>[] = [
+  { value: 14, label: '14 Tage' },
+  { value: 30, label: '30 Tage' },
+];
 /** So weit reicht die Prognose in die Zukunft */
 const FORECAST_DAYS = 14;
 /** So viele Problemkarten werden gezeigt */
 const PROBLEM_COUNT = 5;
-
-const MATURITY_ORDER: Maturity[] = ['mature', 'young', 'learning', 'new'];
 
 const shortDate = new Intl.DateTimeFormat('de-DE', { day: 'numeric', month: 'numeric' });
 const longDate = new Intl.DateTimeFormat('de-DE', {
@@ -39,21 +40,14 @@ const longDate = new Intl.DateTimeFormat('de-DE', {
   month: 'numeric',
 });
 
-/** Ein Abschnitt im Lernstand-Diagramm, z. B. „gefestigt: 40“ */
-interface Segment {
-  maturity: Maturity;
-  label: string;
-  count: number;
-  percent: number;
-}
-
 /**
- * Statistik: Lernserie, Verlauf der letzten Tage, Prognose, Lernstand je Fach und Problemkarten.
- * Die Kennzahlen berechnen die reinen Funktionen aus statistics.ts; die Seite bereitet sie nur auf.
+ * Statistik: Kennzahlen, Verlauf der letzten Tage, Prognose, Lernstand je Fach und Problemkarten.
+ * Die Zahlen berechnen die reinen Funktionen aus core/learning/statistics.ts;
+ * diese Seite bereitet sie nur für die Anzeige-Bausteine auf.
  */
 @Component({
   selector: 'app-statistics-page',
-  imports: [RouterLink, PageHeader, BarChart],
+  imports: [PageHeader, KeyFigures, SegmentedControl, BarChart, MaturityOverview, ItemRow],
   templateUrl: './statistics-page.html',
   styleUrl: './statistics-page.css',
 })
@@ -63,35 +57,42 @@ export class StatisticsPage {
   private readonly clock = inject(Clock);
 
   protected readonly ranges = RANGES;
-  protected readonly range = signal<Range>(14);
+  /** Gewählter Zeitraum in Tagen; der Umschalter ändert ihn über [(value)] */
+  protected readonly range = signal(14);
 
   private readonly log = this.learning.activityData;
   protected readonly hasActivity = computed(() => Object.keys(this.log()).length > 0);
 
-  // ---------- Kennzahlen oben ----------
+  // ---------- Kennzahlen ----------
 
-  protected readonly streak = computed(() => currentStreak(this.log(), this.clock.now()));
-  protected readonly today = computed(() => this.log()[dayKey(this.clock.now())] ?? EMPTY_DAY);
-  /** Summe des gewählten Zeitraums */
-  protected readonly period = computed(() => sumDays(this.history()));
-  protected readonly periodAccuracy = computed(() => accuracy(this.period()));
-  protected readonly periodTime = computed(() => formatDuration(this.period().timeMs));
-
-  // ---------- Verlauf ----------
-
+  /** Tage im gewählten Zeitraum, älteste zuerst */
   private readonly history = computed(() =>
     activityHistory(this.log(), this.range(), this.clock.now()),
   );
+  /** Summe des gewählten Zeitraums */
+  private readonly period = computed(() => sumDays(this.history()));
+
+  protected readonly figures = computed<Figure[]>(() => {
+    const now = this.clock.now();
+    const rate = accuracy(this.period());
+    return [
+      { label: 'Tage in Folge', value: currentStreak(this.log(), now) },
+      { label: 'Antworten heute', value: (this.log()[dayKey(now)] ?? EMPTY_DAY).reviews },
+      { label: `richtig (${this.range()} Tage)`, value: rate === null ? '–' : `${rate} %` },
+      { label: `Lernzeit (${this.range()} Tage)`, value: formatDuration(this.period().timeMs) },
+    ];
+  });
+
+  // ---------- Verlauf ----------
 
   protected readonly historyBars = computed<Bar[]>(() =>
     this.history().map((day) => {
       const rate = accuracy(day);
+      const details = rate === null ? '' : `, ${rate} % richtig, ${formatDuration(day.timeMs)}`;
       return {
         label: shortDate.format(day.date),
         value: day.reviews,
-        description:
-          `${longDate.format(day.date)}: ${day.reviews} Antworten` +
-          (rate === null ? '' : `, ${rate} % richtig, ${formatDuration(day.timeMs)}`),
+        description: `${longDate.format(day.date)}: ${day.reviews} Antworten${details}`,
       };
     }),
   );
@@ -134,54 +135,43 @@ export class StatisticsPage {
 
   // ---------- Lernstand je Fach ----------
 
-  protected readonly maturity = computed(() => {
+  protected readonly maturityTotal = computed(() => {
     const progress = this.learning.progressData();
-    const rows = this.library.subjects().map((subject) => ({
-      id: subject.id,
-      name: subject.name,
-      segments: toSegments(this.library.itemsIn({ subjectId: subject.id }), progress),
-    }));
-    return {
-      overall: toSegments(this.library.items(), progress),
-      rows,
-    };
+    return maturityShares(this.library.items().map((item) => progress[item.id]));
   });
 
-  /** Text für Screenreader, z. B. „gefestigt 40, gelernt 12, in Arbeit 3, neu 20“ */
-  protected describe(segments: Segment[]): string {
-    return segments.map((segment) => `${segment.label} ${segment.count}`).join(', ');
-  }
+  protected readonly maturityRows = computed<MaturityRow[]>(() => {
+    const progress = this.learning.progressData();
+    return this.library.subjects().map((subject) => ({
+      id: subject.id,
+      name: subject.name,
+      shares: maturityShares(
+        this.library.itemsIn({ subjectId: subject.id }).map((item) => progress[item.id]),
+      ),
+    }));
+  });
 
   // ---------- Problemkarten ----------
 
   /** Am häufigsten vergessene Einheiten – oft hilft es, sie umzuformulieren oder aufzuteilen */
   protected readonly problems = computed(() => {
     const progress = this.learning.progressData();
-    return this.library
-      .items()
-      .map((item) => ({ item, state: progress[item.id] }))
-      .filter(({ state }) => (state?.lapses ?? 0) > 0)
-      .sort((a, b) => b.state!.lapses - a.state!.lapses || a.state!.ease - b.state!.ease)
-      .slice(0, PROBLEM_COUNT)
-      .map(({ item, state }) => {
-        const chapter = this.library.chapter(item.chapterId);
-        return {
-          item,
-          lapses: state!.lapses,
-          text: item.kind === 'flashcard' ? item.front : item.question,
-          link: ['/fach', chapter?.subjectId, 'kapitel', item.chapterId, 'eintrag', item.id],
-        };
-      });
+    return (
+      this.library
+        .items()
+        // flatMap mit [] bzw. [Eintrag]: filtert und behält zugleich den Lernstand zur Einheit
+        .flatMap((item) => {
+          const state = progress[item.id];
+          return state && state.lapses > 0 ? [{ item, state }] : [];
+        })
+        .sort((a, b) => b.state.lapses - a.state.lapses || a.state.ease - b.state.ease)
+        .slice(0, PROBLEM_COUNT)
+        .map(({ item, state }) => ({
+          id: item.id,
+          text: itemTitle(item),
+          lapses: `${state.lapses}×`,
+          link: itemLink(this.library.subjectIdOf(item) ?? '', item.chapterId, item.id),
+        }))
+    );
   });
-}
-
-/** Teilt Einheiten nach Lernstand auf, in fester Reihenfolge von „gefestigt“ bis „neu“ */
-function toSegments(items: StudyItem[], progress: Record<string, CardState>): Segment[] {
-  const counts = countByMaturity(items.map((item) => progress[item.id]));
-  return MATURITY_ORDER.map((maturity) => ({
-    maturity,
-    label: MATURITY_LABELS[maturity],
-    count: counts[maturity],
-    percent: items.length > 0 ? (counts[maturity] / items.length) * 100 : 0,
-  }));
 }

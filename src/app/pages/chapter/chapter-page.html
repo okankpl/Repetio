@@ -1,6 +1,6 @@
 @if (chapter(); as chapter) {
   <app-page-header
-    [backLink]="['/fach', subjectId()]"
+    [backLink]="backLink()"
     [backLabel]="subject()?.name ?? 'Fach'"
     [eyebrow]="'Kapitel ' + nr()"
     [title]="chapter.title"
@@ -27,19 +27,15 @@
       </span>
     </div>
     @if (section.entries.length > 0) {
-      <ul class="card list items">
-        @for (entry of section.entries; track entry.item.id) {
+      <ul class="card list">
+        @for (entry of section.entries; track entry.id) {
           <li>
-            <a class="item" [routerLink]="['eintrag', entry.item.id]">
-              <span class="item-text">{{ entry.text }}</span>
-              <span
-                class="status"
-                [class.due]="entry.status === 'fällig'"
-                [class.new]="entry.status === 'neu'"
-              >
-                {{ entry.status }}
-              </span>
-            </a>
+            <app-item-row
+              [link]="entry.link"
+              [text]="entry.text"
+              [pill]="entry.status"
+              [tone]="entry.tone"
+            />
           </li>
         }
       </ul>
@@ -64,10 +60,6 @@
     </div>
   }
 } @else {
-  <app-page-header
-    [backLink]="['/fach', subjectId()]"
-    backLabel="Fach"
-    title="Kapitel nicht gefunden"
-  />
+  <app-page-header [backLink]="backLink()" backLabel="Fach" title="Kapitel nicht gefunden" />
   <p class="card empty">Dieses Kapitel gibt es nicht (mehr).</p>
 }

@@ -40,24 +40,7 @@
 } @else if (hadItems()) {
   <section class="card summary">
     <h2>Runde geschafft!</h2>
-    <dl class="figures">
-      <div>
-        <dt>richtig</dt>
-        <dd class="right">{{ right() }}</dd>
-      </div>
-      <div>
-        <dt>falsch</dt>
-        <dd class="wrong">{{ wrong() }}</dd>
-      </div>
-      <div>
-        <dt>Trefferquote</dt>
-        <dd>{{ accuracy() }} %</dd>
-      </div>
-      <div>
-        <dt>Lernzeit</dt>
-        <dd>{{ duration() }}</dd>
-      </div>
-    </dl>
+    <app-key-figures class="figures" [figures]="summary()" [columns]="2" />
     <p class="hint">Falsch beantwortete Einheiten wurden in der Runde wiederholt.</p>
     <button class="btn btn-primary btn-block" (click)="leave()">Zurück</button>
     @if (canUndo()) {

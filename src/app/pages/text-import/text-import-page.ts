@@ -2,8 +2,11 @@ import { Component, computed, inject, input, linkedSignal, signal } from '@angul
 import { LibraryStore } from '../../core/library/library-store';
 import { parseItemsFromText } from '../../core/library/text-import';
 import { StudyKind } from '../../core/models';
+import { chapterLink } from '../../app.links';
+import { FileButton } from '../../shared/file-button/file-button';
 import { injectLeavePage } from '../../shared/leave-page';
 import { PageHeader } from '../../shared/page-header/page-header';
+import { SegmentOption, SegmentedControl } from '../../shared/segmented-control/segmented-control';
 
 /** So viele erkannte Einträge zeigt die Vorschau */
 const PREVIEW_SIZE = 5;
@@ -14,7 +17,7 @@ const PREVIEW_SIZE = 5;
  */
 @Component({
   selector: 'app-text-import-page',
-  imports: [PageHeader],
+  imports: [PageHeader, SegmentedControl, FileButton],
   templateUrl: './text-import-page.html',
   styleUrl: './text-import-page.css',
 })
@@ -28,12 +31,12 @@ export class TextImportPage {
   readonly art = input<string>();
 
   protected readonly chapter = computed(() => this.library.chapter(this.chapterId()));
-  protected readonly backLink = computed(() => [
-    '/fach',
-    this.subjectId(),
-    'kapitel',
-    this.chapterId(),
-  ]);
+  protected readonly backLink = computed(() => chapterLink(this.subjectId(), this.chapterId()));
+
+  protected readonly kinds: SegmentOption<StudyKind>[] = [
+    { value: 'flashcard', label: 'Karteikarten' },
+    { value: 'choice', label: 'Quizfragen' },
+  ];
 
   /** Art der Einträge: startet mit dem Wert aus der Adresse, lässt sich auf der Seite umschalten */
   protected readonly kind = linkedSignal<StudyKind>(() =>
@@ -54,15 +57,9 @@ export class TextImportPage {
       : 'Welche Farbe hat der Himmel? ; Blau ; Grün ; Rot ; Gelb ; Wegen der Lichtstreuung\n2 + 2 = ? ; 4 ; 3 ; 5',
   );
 
-  protected setKind(kind: StudyKind): void {
-    this.kind.set(kind);
-  }
-
   /** Liest eine Textdatei (z. B. CSV oder einen Anki-Export) in das Textfeld ein */
-  protected async loadFile(input: HTMLInputElement): Promise<void> {
-    const file = input.files?.[0];
-    input.value = '';
-    if (file) this.text.set(await file.text());
+  protected async loadFile(file: File): Promise<void> {
+    this.text.set(await file.text());
   }
 
   protected import(): void {

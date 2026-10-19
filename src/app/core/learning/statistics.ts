@@ -31,6 +31,29 @@ export function countByMaturity(states: (CardState | undefined)[]): Record<Matur
   return counts;
 }
 
+/** Anteil eines Lernstands, z. B. „gefestigt: 40 von 120“ */
+export interface MaturityShare {
+  maturity: Maturity;
+  label: string;
+  count: number;
+  /** Anteil in Prozent (0–100) */
+  percent: number;
+}
+
+/** Reihenfolge in Diagrammen: von „gefestigt“ (am weitesten) bis „neu“ */
+const MATURITY_ORDER: Maturity[] = ['mature', 'young', 'learning', 'new'];
+
+/** Anteile der Lernstände, in fester Reihenfolge – Grundlage für den gestapelten Balken */
+export function maturityShares(states: (CardState | undefined)[]): MaturityShare[] {
+  const counts = countByMaturity(states);
+  return MATURITY_ORDER.map((maturity) => ({
+    maturity,
+    label: MATURITY_LABELS[maturity],
+    count: counts[maturity],
+    percent: states.length > 0 ? (counts[maturity] / states.length) * 100 : 0,
+  }));
+}
+
 /** Ein Tag im Verlauf, mit Datum für die Beschriftung */
 export interface ActivityDay extends DayActivity {
   /** Mitternacht des Tages */

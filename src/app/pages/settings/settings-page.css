@@ -32,16 +32,6 @@ input[type='number'] {
   text-align: center;
 }
 
-.hint {
-  font-size: 14px;
-  color: var(--muted);
-}
-
-.notice {
-  margin-bottom: 4px;
-  text-align: center;
-}
-
 select {
   flex: none;
   width: auto;

@@ -126,6 +126,11 @@ textarea {
   padding: 6px;
 }
 
+ul.list {
+  margin: 0;
+  list-style: none;
+}
+
 /* Hinweis, wenn eine Liste leer ist */
 .empty {
   font-size: 14px;
@@ -170,6 +175,54 @@ textarea {
   display: grid;
   gap: 10px;
   margin-top: 14px;
+}
+
+/* Kleiner, grauer Erklärtext */
+.hint {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Rückmeldung nach einer Aktion, z. B. „Sicherung geladen.“ */
+.notice {
+  margin-bottom: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Text nach zwei Zeilen mit „…“ abschneiden, z. B. lange Fragen in Listen */
+.clamp-2 {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* Kleine Markierung, z. B. Lernstatus „fällig“ oder „3×“ vergessen */
+.pill {
+  flex: none;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface-muted);
+  border-radius: 999px;
+}
+
+.pill.accent {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.pill.success {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.pill.danger {
+  color: var(--danger);
+  background: var(--danger-soft);
 }
 
 /* ---------- Buttons ---------- */

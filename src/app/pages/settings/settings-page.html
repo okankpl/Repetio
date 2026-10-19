@@ -104,17 +104,7 @@
   }
   <div class="button-row">
     <button class="btn btn-secondary" (click)="exportBackup()">Sicherung speichern</button>
-    <!-- Ein <label> öffnet beim Antippen das zugehörige, unsichtbare Datei-Feld -->
-    <label class="btn btn-secondary">
-      Sicherung laden
-      <input
-        #file
-        class="visually-hidden"
-        type="file"
-        accept="application/json,.json"
-        (change)="importBackup(file)"
-      />
-    </label>
+    <app-file-button label="Sicherung laden" (picked)="importBackup($event)" />
   </div>
 </section>
 

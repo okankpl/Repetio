@@ -1,5 +1,6 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { chapterLink } from '../../app.links';
 import { DataSafety } from '../../core/data-safety';
 import { LearningStore } from '../../core/learning/learning-store';
 import { LibraryStore } from '../../core/library/library-store';
@@ -44,7 +45,7 @@ export class SubjectPage {
   protected addChapter(title: string): void {
     const chapter = this.library.addChapter(this.subjectId(), title);
     // Direkt ins neue Kapitel, damit man gleich Karten anlegen kann
-    this.router.navigate(['/fach', this.subjectId(), 'kapitel', chapter.id]);
+    this.router.navigate(chapterLink(this.subjectId(), chapter.id));
   }
 
   protected rename(name: string): void {

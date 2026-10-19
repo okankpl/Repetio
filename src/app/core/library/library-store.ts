@@ -79,6 +79,13 @@ export class LibraryStore {
     return this.chapter(item.chapterId)?.subjectId;
   }
 
+  /** Herkunft einer Einheit als Text, z. B. "Mathematik · Analysis" */
+  contextOf(item: StudyItem): string {
+    const chapter = this.chapter(item.chapterId);
+    const subject = chapter && this.subject(chapter.subjectId);
+    return [subject?.name, chapter?.title].filter(Boolean).join(' · ');
+  }
+
   /** Ein Fach mit seinen Kapiteln und Einheiten, z. B. zum Teilen als Datei */
   subjectContent(subjectId: string): Library {
     return {

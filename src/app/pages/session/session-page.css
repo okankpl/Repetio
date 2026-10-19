@@ -27,49 +27,16 @@
   text-align: center;
 }
 
-.right {
-  color: var(--success);
-}
-
-.wrong {
-  color: var(--danger);
-}
-
-.hint {
-  margin-bottom: 6px;
-  font-size: 14px;
-  color: var(--muted);
-}
-
 .undo {
   min-width: 44px;
   font-size: 20px;
 }
 
-/* Kennzahlen der Zusammenfassung in zwei Spalten */
 .figures {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  display: block;
   margin: 6px 0;
 }
 
-.figures div {
-  display: flex;
-  flex-direction: column-reverse; /* Zahl oben, Beschriftung darunter */
-  padding: 10px 4px;
-  background: var(--surface-muted);
-  border-radius: var(--radius-sm);
-}
-
-.figures dd {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.figures dt {
-  font-size: 13px;
-  color: var(--muted);
+.hint {
+  margin-bottom: 6px;
 }

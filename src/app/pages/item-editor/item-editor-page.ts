@@ -10,6 +10,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule } from '@angular/forms';
+import { chapterLink } from '../../app.links';
 import { createId } from '../../core/id';
 import { LibraryStore } from '../../core/library/library-store';
 import { StudyItem, StudyKind } from '../../core/models';
@@ -49,12 +50,7 @@ export class ItemEditorPage implements OnInit {
   );
   protected readonly notFound = computed(() => !!this.itemId() && !this.existing());
   protected readonly chapter = computed(() => this.library.chapter(this.chapterId()));
-  protected readonly backLink = computed(() => [
-    '/fach',
-    this.subjectId(),
-    'kapitel',
-    this.chapterId(),
-  ]);
+  protected readonly backLink = computed(() => chapterLink(this.subjectId(), this.chapterId()));
   protected readonly title = computed(() => {
     const what = this.itemKind() === 'flashcard' ? 'Karteikarte' : 'Quizfrage';
     return this.existing() ? `${what} bearbeiten` : `Neue ${what}`;

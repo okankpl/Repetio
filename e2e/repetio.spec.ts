@@ -32,8 +32,8 @@ test('cards from a bulk import can be learned and show up in the statistics', as
   await expect(page.getByRole('heading', { name: 'Runde geschafft!' })).toBeVisible();
 
   await page.getByRole('link', { name: 'Zur Statistik' }).click();
-  await expect(page.locator('.tiles')).toContainText(/Antworten heute\s*3/);
-  await expect(page.locator('.tiles')).toContainText('100 %');
+  await expect(page.locator('app-key-figures')).toContainText(/Antworten heute\s*3/);
+  await expect(page.locator('app-key-figures')).toContainText('100 %');
 });
 
 test('the last rating can be taken back', async ({ page }) => {
@@ -54,7 +54,7 @@ test('the last rating can be taken back', async ({ page }) => {
   await expect(undo).toBeDisabled();
   await page.getByRole('button', { name: /Aufdecken/ }).click();
   await page.getByRole('button', { name: /Richtig/ }).click();
-  await expect(page.locator('.figures')).toContainText('100 %');
+  await expect(page.locator('app-key-figures')).toContainText('100 %');
 });
 
 test.describe('am PC', () => {

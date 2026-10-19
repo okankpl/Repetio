@@ -59,7 +59,9 @@ describe('App (Seiten über den Router)', () => {
     input.value = 'feynman was';
     input.dispatchEvent(new Event('input'));
     await harness.fixture.whenStable();
-    expect(page.querySelector('.result')?.textContent).toContain('Was ist die Feynman-Methode?');
+    expect(page.querySelector('app-item-row')?.textContent).toContain(
+      'Was ist die Feynman-Methode?',
+    );
   });
 
   it('opens the bulk import for quiz questions', async () => {

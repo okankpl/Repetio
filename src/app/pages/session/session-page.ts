@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { scopeLink } from '../../app.links';
 import { MAX_TIME_PER_REVIEW_MS } from '../../core/learning/activity';
 import { LearningStore } from '../../core/learning/learning-store';
 import { formatDuration } from '../../core/learning/statistics';
@@ -8,6 +9,7 @@ import { StudyItem, StudyScope } from '../../core/models';
 import { Settings } from '../../core/settings';
 import { RATING, Rating } from '../../core/learning/srs';
 import { injectLeavePage } from '../../shared/leave-page';
+import { Figure, KeyFigures } from '../../shared/key-figures/key-figures';
 import { ProgressBar } from '../../shared/progress-bar/progress-bar';
 import { ChoiceView } from './choice-view/choice-view';
 import { FlashcardView } from './flashcard-view/flashcard-view';
@@ -31,7 +33,7 @@ interface Step {
  */
 @Component({
   selector: 'app-session-page',
-  imports: [RouterLink, ProgressBar, FlashcardView, ChoiceView],
+  imports: [RouterLink, ProgressBar, KeyFigures, FlashcardView, ChoiceView],
   templateUrl: './session-page.html',
   styleUrl: './session-page.css',
   // "z" nimmt die letzte Bewertung zurück (außer beim Tippen in einem Textfeld)
@@ -47,7 +49,7 @@ export class SessionPage implements OnInit {
   /** Umfang der Runde aus der Adresse */
   private scope: StudyScope = {};
   /** Wohin "Beenden" führt, wenn es keine vorige Seite gibt: Kapitel, Fach oder Startseite */
-  private backLink: unknown[] = ['/'];
+  private backLink: string[] = ['/'];
   /** Seit wann die aktuelle Einheit angezeigt wird – für die Lernzeit */
   private shownAt = Date.now();
 
@@ -68,11 +70,17 @@ export class SessionPage implements OnInit {
   private readonly steps = signal<Step[]>([]);
   protected readonly canUndo = computed(() => this.steps().length > 0);
 
-  protected readonly accuracy = computed(() => {
+  /** Kennzahlen für die Zusammenfassung am Ende der Runde */
+  protected readonly summary = computed<Figure[]>(() => {
     const answers = this.right() + this.wrong();
-    return answers > 0 ? Math.round((this.right() / answers) * 100) : 0;
+    const accuracy = answers > 0 ? Math.round((this.right() / answers) * 100) : 0;
+    return [
+      { label: 'richtig', value: this.right(), tone: 'success' },
+      { label: 'falsch', value: this.wrong(), tone: 'danger' },
+      { label: 'Trefferquote', value: `${accuracy} %` },
+      { label: 'Lernzeit', value: formatDuration(this.timeMs()) },
+    ];
   });
-  protected readonly duration = computed(() => formatDuration(this.timeMs()));
   /** Noch nie gelernte Einheiten im Umfang, die das Tageslimit gerade zurückhält */
   protected readonly unseen = computed(() => this.learning.overview(this.scope).unseen);
 
@@ -84,9 +92,7 @@ export class SessionPage implements OnInit {
   /** Herkunft der aktuellen Einheit, z. B. "Mathematik · Kapitel Analysis" */
   protected readonly context = computed(() => {
     const item = this.current();
-    const chapter = item && this.library.chapter(item.chapterId);
-    const subject = chapter && this.library.subject(chapter.subjectId);
-    return [subject?.name, chapter?.title].filter(Boolean).join(' · ');
+    return item ? this.library.contextOf(item) : '';
   });
 
   ngOnInit(): void {
@@ -96,7 +102,7 @@ export class SessionPage implements OnInit {
       subjectId: params.get('fach') ?? undefined,
       chapterId: params.get('kapitel') ?? undefined,
     };
-    this.backLink = backLinkFor(this.scope);
+    this.backLink = scopeLink(this.scope);
     this.start();
   }
 
@@ -176,10 +182,4 @@ export class SessionPage implements OnInit {
       this.undo();
     }
   }
-}
-
-function backLinkFor({ subjectId, chapterId }: StudyScope): unknown[] {
-  if (subjectId && chapterId) return ['/fach', subjectId, 'kapitel', chapterId];
-  if (subjectId) return ['/fach', subjectId];
-  return ['/'];
 }

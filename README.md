@@ -34,7 +34,7 @@ Startpaket: 83 kB komprimiert. Lighthouse (Handy-Profil): Barrierefreiheit 100, 
 ## Dokumentation
 
 - [Spezifikation](docs/spezifikation.md) – Anforderungen, Geschäftsregeln, Datenmodell, Dateiformate und messbare Qualitätsanforderungen
-- [Architektur](docs/architektur.md) – Bausteine, Abläufe und Entscheidungen mit Begründung
+- [Architektur](docs/architektur.md) – Bausteine, Abläufe, Entscheidungen mit Begründung und eine Anleitung zum Erweitern
 
 ## Starten
 
@@ -64,8 +64,8 @@ Bei jedem Push auf `main` prüft der Workflow [`deploy.yml`](.github/workflows/d
 ```
 src/app/
 ├── core/          Logik ohne Oberfläche: Datenmodell, Inhalte (library), Lernen und Statistik (learning), Speichern (persistence)
-├── pages/         Eine Komponente je Seite
-└── shared/        Wiederverwendbare Bausteine
+├── pages/         Eine Komponente je Seite, seitenspezifische Teile darunter
+└── shared/        Wiederverwendbare Bausteine (Kopfzeile, Listenzeilen, Kennzahlen, Diagramm, Umschalter …)
 e2e/               End-to-End-Tests
 docs/              Spezifikation, Architektur, Screenshots
 ```

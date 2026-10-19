@@ -1,0 +1,31 @@
+<!-- Legende mit Anzahl: Die Farbe ist nie das einzige Merkmal -->
+<ul class="legend">
+  @for (share of total(); track share.maturity) {
+    <li>
+      <span class="swatch" [class]="share.maturity" aria-hidden="true"></span>
+      {{ share.label }} <strong>{{ share.count }}</strong>
+    </li>
+  }
+</ul>
+
+@for (row of rows(); track row.id) {
+  <div class="row">
+    <span class="name">{{ row.name }}</span>
+    <!-- Gestapelter Balken; role="img" + aria-label beschreibt ihn für Screenreader -->
+    <div class="bar" role="img" [attr.aria-label]="row.name + ': ' + describe(row.shares)">
+      @for (share of row.shares; track share.maturity) {
+        @if (share.count > 0) {
+          <!-- flex-grow verteilt die Breite im Verhältnis der Anteile -->
+          <span
+            class="segment"
+            [class]="share.maturity"
+            [style.flex-grow]="share.percent"
+            [title]="share.label + ': ' + share.count"
+          ></span>
+        }
+      }
+    </div>
+  </div>
+}
+
+<p class="hint">„Gefestigt“ heißt: nächste Wiederholung erst in 21 Tagen oder später.</p>
