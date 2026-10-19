@@ -1,0 +1,5 @@
+# Einheitliche Zeilenenden (LF) im Repository, unabhängig vom Betriebssystem
+* text=auto eol=lf
+
+# Binärdateien nie verändern
+*.png binary

@@ -1,0 +1,4 @@
+# Von Werkzeugen erzeugte Dateien nicht formatieren
+package-lock.json
+dist
+.angular

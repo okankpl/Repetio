@@ -1,0 +1,73 @@
+@if (chapter(); as chapter) {
+  <app-page-header
+    [backLink]="['/fach', subjectId()]"
+    [backLabel]="subject()?.name ?? 'Fach'"
+    [eyebrow]="'Kapitel ' + nr()"
+    [title]="chapter.title"
+  />
+
+  <app-study-card
+    heading="Dieses Kapitel"
+    startLabel="Kapitel lernen"
+    [overview]="overview()"
+    [scope]="scope()"
+  />
+
+  <!-- Gleicher Aufbau für beide Arten: Überschrift mit Anzahl, Liste, Link zum Anlegen -->
+  @for (section of sections(); track section.title) {
+    <div class="section-head">
+      <h2 class="section-title">{{ section.title }} · {{ section.entries.length }}</h2>
+      <span class="links">
+        <!-- Massenimport: viele Einträge auf einmal aus Text -->
+        <a class="add-link" [routerLink]="['import']" [queryParams]="{ art: section.newPath }">
+          Import
+        </a>
+        <!-- Relativer Link: hängt "neu/…" an die aktuelle Adresse an -->
+        <a class="add-link" [routerLink]="['neu', section.newPath]">+ Neu</a>
+      </span>
+    </div>
+    @if (section.entries.length > 0) {
+      <ul class="card list items">
+        @for (entry of section.entries; track entry.item.id) {
+          <li>
+            <a class="item" [routerLink]="['eintrag', entry.item.id]">
+              <span class="item-text">{{ entry.text }}</span>
+              <span
+                class="status"
+                [class.due]="entry.status === 'fällig'"
+                [class.new]="entry.status === 'neu'"
+              >
+                {{ entry.status }}
+              </span>
+            </a>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="card empty">{{ section.empty }}</p>
+    }
+  }
+
+  <h2 class="section-title">Kapitel verwalten</h2>
+  @if (renaming()) {
+    <app-name-form
+      placeholder="Titel des Kapitels"
+      submitLabel="Umbenennen"
+      [value]="chapter.title"
+      (saved)="rename($event)"
+      (cancelled)="renaming.set(false)"
+    />
+  } @else {
+    <div class="button-row">
+      <button class="btn btn-secondary" (click)="renaming.set(true)">Umbenennen</button>
+      <button class="btn btn-danger" (click)="delete()">Kapitel löschen</button>
+    </div>
+  }
+} @else {
+  <app-page-header
+    [backLink]="['/fach', subjectId()]"
+    backLabel="Fach"
+    title="Kapitel nicht gefunden"
+  />
+  <p class="card empty">Dieses Kapitel gibt es nicht (mehr).</p>
+}

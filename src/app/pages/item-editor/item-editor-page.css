@@ -1,0 +1,45 @@
+.editor {
+  display: grid;
+  gap: 14px;
+}
+
+fieldset {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+legend {
+  margin-bottom: 6px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Richtige Antwort grün markieren, damit man sie beim Anlegen nicht verwechselt */
+.correct input {
+  border-color: var(--success);
+}
+
+small {
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.error {
+  margin-top: -8px;
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.delete {
+  margin-top: 12px;
+}
+
+.saved {
+  font-size: 13px;
+  text-align: center;
+  color: var(--success);
+}

@@ -1,0 +1,105 @@
+<app-page-header backLink="/" backLabel="Fächer" title="Statistik" />
+
+@if (!hasActivity()) {
+  <p class="card empty">Noch keine Antworten – die Statistik füllt sich mit jeder Lernrunde.</p>
+}
+
+<!-- Kennzahlen: Zahl groß, Beschriftung darunter -->
+<dl class="tiles">
+  <div class="card tile">
+    <dt>Tage in Folge</dt>
+    <dd>{{ streak() }}</dd>
+  </div>
+  <div class="card tile">
+    <dt>Antworten heute</dt>
+    <dd>{{ today().reviews }}</dd>
+  </div>
+  <div class="card tile">
+    <dt>richtig ({{ range() }} Tage)</dt>
+    <dd>{{ periodAccuracy() === null ? '–' : periodAccuracy() + ' %' }}</dd>
+  </div>
+  <div class="card tile">
+    <dt>Lernzeit ({{ range() }} Tage)</dt>
+    <dd>{{ periodTime() }}</dd>
+  </div>
+</dl>
+
+<div class="section-head">
+  <h2 class="section-title">Verlauf</h2>
+  <!-- Zeitraum wählen; gilt für Verlauf und die Kennzahlen oben -->
+  <div class="segments" role="group" aria-label="Zeitraum">
+    @for (option of ranges; track option) {
+      <button
+        class="btn"
+        [class.active]="range() === option"
+        [attr.aria-pressed]="range() === option"
+        (click)="range.set(option)"
+      >
+        {{ option }} Tage
+      </button>
+    }
+  </div>
+</div>
+<section class="card">
+  <app-bar-chart label="Antworten pro Tag" [bars]="historyBars()" [summary]="historySummary()" />
+</section>
+
+<h2 class="section-title">Prognose</h2>
+<section class="card">
+  <app-bar-chart
+    label="Fällige Wiederholungen pro Tag"
+    [bars]="forecastBars()"
+    [summary]="forecastSummary()"
+  />
+</section>
+
+<h2 class="section-title">Lernstand</h2>
+<section class="card maturity">
+  <!-- Legende mit Anzahl: Farbe ist nie das einzige Merkmal -->
+  <ul class="legend">
+    @for (segment of maturity().overall; track segment.maturity) {
+      <li>
+        <span class="swatch" [class]="segment.maturity" aria-hidden="true"></span>
+        {{ segment.label }} <strong>{{ segment.count }}</strong>
+      </li>
+    }
+  </ul>
+  @for (row of maturity().rows; track row.id) {
+    <div class="row">
+      <span class="row-name">{{ row.name }}</span>
+      <!-- Gestapelter Balken; role="img" + Beschreibung für Screenreader -->
+      <div
+        class="stack-bar"
+        role="img"
+        [attr.aria-label]="row.name + ': ' + describe(row.segments)"
+      >
+        @for (segment of row.segments; track segment.maturity) {
+          @if (segment.count > 0) {
+            <span
+              class="segment"
+              [class]="segment.maturity"
+              [style.flex-grow]="segment.percent"
+              [title]="segment.label + ': ' + segment.count"
+            ></span>
+          }
+        }
+      </div>
+    </div>
+  }
+  <p class="hint">„Gefestigt“ heißt: nächste Wiederholung erst in 21 Tagen oder später.</p>
+</section>
+
+@if (problems().length > 0) {
+  <h2 class="section-title">Am häufigsten vergessen</h2>
+  <ul class="card list problems">
+    @for (problem of problems(); track problem.item.id) {
+      <li>
+        <a class="problem" [routerLink]="problem.link">
+          <span class="problem-text">{{ problem.text }}</span>
+          <span class="count">{{ problem.lapses }}×</span>
+        </a>
+      </li>
+    }
+  </ul>
+  <p class="hint below">Tipp: Solche Karten umformulieren oder in kleinere aufteilen.</p>
+}

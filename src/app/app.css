@@ -1,0 +1,24 @@
+main {
+  padding-bottom: max(32px, env(safe-area-inset-bottom));
+}
+
+.banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: max(8px, env(safe-area-inset-top)) 16px 8px;
+  font-size: 14px;
+  background: var(--primary-soft);
+}
+
+.banner.warning {
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+
+.banner .btn {
+  flex: none;
+  min-height: 36px;
+  padding-block: 6px;
+}

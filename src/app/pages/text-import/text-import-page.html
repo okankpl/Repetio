@@ -1,0 +1,110 @@
+<app-page-header
+  [backLink]="backLink()"
+  [backLabel]="chapter()?.title ?? 'Kapitel'"
+  eyebrow="Massenimport"
+  [title]="kind() === 'flashcard' ? 'Karteikarten importieren' : 'Quizfragen importieren'"
+/>
+
+@if (chapter()) {
+  <section class="card stack">
+    <!-- Umschalter als Gruppe von zwei Buttons; aria-pressed sagt Screenreadern, welcher aktiv ist -->
+    <div class="segments" role="group" aria-label="Art der Einträge">
+      <button
+        class="btn"
+        [class.active]="kind() === 'flashcard'"
+        [attr.aria-pressed]="kind() === 'flashcard'"
+        (click)="setKind('flashcard')"
+      >
+        Karteikarten
+      </button>
+      <button
+        class="btn"
+        [class.active]="kind() === 'choice'"
+        [attr.aria-pressed]="kind() === 'choice'"
+        (click)="setKind('choice')"
+      >
+        Quizfragen
+      </button>
+    </div>
+
+    <div class="format">
+      <p>Eine Zeile pro Eintrag, Spalten getrennt durch <code>;</code> oder Tabulator:</p>
+      @if (kind() === 'flashcard') {
+        <p><code>Frage ; Antwort</code></p>
+      } @else {
+        <p><code>Frage ; richtige Antwort ; falsche Antwort ; …</code></p>
+        <p>1–3 falsche Antworten. Bei genau 6 Spalten ist die letzte die Begründung.</p>
+      }
+      <p class="hint">
+        Passt auch zu Tabellen aus Excel und zu Anki-Exporten („Notizen als reiner Text“).
+      </p>
+    </div>
+
+    <label class="field">
+      Text
+      <!-- #box: Template-Referenz, damit (input) den aktuellen Inhalt lesen kann -->
+      <textarea
+        #box
+        rows="8"
+        spellcheck="false"
+        [placeholder]="placeholder()"
+        [value]="text()"
+        (input)="text.set(box.value)"
+      ></textarea>
+    </label>
+    <label class="btn btn-secondary">
+      Textdatei laden (.txt, .csv)
+      <input
+        #file
+        class="visually-hidden"
+        type="file"
+        accept=".txt,.csv,.tsv,text/plain,text/csv"
+        (change)="loadFile(file)"
+      />
+    </label>
+  </section>
+
+  @if (text().trim()) {
+    <h2 class="section-title">Vorschau · {{ result().items.length }} erkannt</h2>
+    <section class="card stack" aria-live="polite">
+      @if (preview().length > 0) {
+        <ul class="preview">
+          @for (item of preview(); track item.id) {
+            <li>
+              @if (item.kind === 'flashcard') {
+                <strong>{{ item.front }}</strong>
+                <span>{{ item.back }}</span>
+              } @else {
+                <strong>{{ item.question }}</strong>
+                <span class="correct">✓ {{ item.correct }}</span>
+                <span>✗ {{ item.wrong.join(' · ') }}</span>
+              }
+            </li>
+          }
+        </ul>
+        @if (more() > 0) {
+          <p class="hint">… und {{ more() }} weitere</p>
+        }
+      }
+      @if (result().skipped.length > 0) {
+        <div class="skipped" role="alert">
+          <strong>
+            {{ result().skipped.length }}
+            {{ result().skipped.length === 1 ? 'Zeile wird' : 'Zeilen werden' }} übersprungen:
+          </strong>
+          <ul>
+            @for (skip of result().skipped.slice(0, 5); track skip.line) {
+              <li>Zeile {{ skip.line }}: {{ skip.reason }}</li>
+            }
+          </ul>
+        </div>
+      }
+      <button class="btn btn-primary" [disabled]="result().items.length === 0" (click)="import()">
+        {{ result().items.length }} {{ kind() === 'flashcard' ? 'Karteikarten' : 'Quizfragen' }}
+        importieren
+      </button>
+    </section>
+  }
+} @else {
+  <p class="card empty">Dieses Kapitel gibt es nicht (mehr).</p>
+}

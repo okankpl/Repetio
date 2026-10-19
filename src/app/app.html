@@ -1,0 +1,24 @@
+@if (persistence.problem(); as problem) {
+  <!-- role="alert": Screenreader lesen die Meldung sofort vor -->
+  <div class="banner warning" role="alert">
+    <span>{{ problem }}</span>
+    <button class="btn btn-secondary" (click)="persistence.problem.set(null)">OK</button>
+  </div>
+}
+
+@if (broken()) {
+  <div class="banner warning" role="alert">
+    <span>Die App muss neu geladen werden.</span>
+    <button class="btn btn-secondary" (click)="reload()">Neu laden</button>
+  </div>
+} @else if (updateReady()) {
+  <div class="banner" role="status">
+    <span>Eine neue Version ist da.</span>
+    <button class="btn btn-primary" (click)="reload()">Neu laden</button>
+  </div>
+}
+
+<main class="container">
+  <!-- Hier setzt der Router die Seite ein, die zur aktuellen Adresse gehört -->
+  <router-outlet />
+</main>

@@ -1,0 +1,129 @@
+<app-page-header backLink="/" backLabel="Fächer" title="Einstellungen" />
+
+@if (message()) {
+  <!-- role="status" lässt Screenreader die Rückmeldung automatisch vorlesen -->
+  <p class="card notice" role="status">{{ message() }}</p>
+}
+
+<h2 class="section-title">Lernen</h2>
+<section class="card settings">
+  <label class="setting">
+    <span>
+      Antworten eintippen
+      <small>Bei Karteikarten erst selbst formulieren, dann vergleichen</small>
+    </span>
+    <input
+      #typing
+      type="checkbox"
+      [checked]="settings.current().typeAnswers"
+      (change)="settings.update({ typeAnswers: typing.checked })"
+    />
+  </label>
+  <label class="setting">
+    <span>
+      Neue Karteikarten pro Tag
+      <small>je Fach</small>
+    </span>
+    <input
+      #cards
+      type="number"
+      inputmode="numeric"
+      min="0"
+      max="100"
+      [value]="settings.current().newFlashcardsPerDay"
+      (change)="setLimit('newFlashcardsPerDay', cards.value)"
+    />
+  </label>
+  <label class="setting">
+    <span>
+      Neue Quizfragen pro Tag
+      <small>je Fach</small>
+    </span>
+    <input
+      #questions
+      type="number"
+      inputmode="numeric"
+      min="0"
+      max="100"
+      [value]="settings.current().newQuestionsPerDay"
+      (change)="setLimit('newQuestionsPerDay', questions.value)"
+    />
+  </label>
+</section>
+
+<h2 class="section-title">Darstellung</h2>
+<section class="card settings">
+  <label class="setting">
+    <span>Design</span>
+    <select #theme (change)="setTheme(theme.value)">
+      @for (option of themes; track option.value) {
+        <option [value]="option.value" [selected]="settings.current().theme === option.value">
+          {{ option.label }}
+        </option>
+      }
+    </select>
+  </label>
+</section>
+
+<h2 class="section-title">Daten</h2>
+<section class="card stack">
+  <p class="hint">
+    Fächer, Karten und Lernstand liegen nur auf diesem Gerät. Mit einer Sicherung lassen sie sich
+    auf ein anderes Gerät übertragen, z. B. vom PC aufs Handy.
+  </p>
+  <dl class="facts">
+    <div>
+      <dt>Letzte Sicherung</dt>
+      <dd [class.warn]="dataSafety.reminderDue()">{{ lastBackupText() }}</dd>
+    </div>
+    <div>
+      <dt>Belegter Speicher</dt>
+      <dd>{{ usage().text }} (ca. {{ usage().percent }} %)</dd>
+    </div>
+    <div>
+      <dt>Vor Löschen geschützt</dt>
+      <dd>
+        @switch (dataSafety.persisted()) {
+          @case (true) {
+            ja
+          }
+          @case (false) {
+            <span class="warn">nein</span>
+          }
+          @default {
+            unbekannt
+          }
+        }
+      </dd>
+    </div>
+  </dl>
+  @if (dataSafety.persisted() === false) {
+    <button class="btn btn-secondary" (click)="requestPersistence()">
+      Browser um dauerhaften Speicher bitten
+    </button>
+  }
+  <div class="button-row">
+    <button class="btn btn-secondary" (click)="exportBackup()">Sicherung speichern</button>
+    <!-- Ein <label> öffnet beim Antippen das zugehörige, unsichtbare Datei-Feld -->
+    <label class="btn btn-secondary">
+      Sicherung laden
+      <input
+        #file
+        class="visually-hidden"
+        type="file"
+        accept="application/json,.json"
+        (change)="importBackup(file)"
+      />
+    </label>
+  </div>
+</section>
+
+<h2 class="section-title">Zurücksetzen</h2>
+<section class="card stack">
+  <button class="btn btn-danger" (click)="resetProgress()">Lernfortschritt löschen</button>
+  @if (!library.hasSampleSubject()) {
+    <button class="btn btn-secondary" (click)="restoreSample()">
+      Beispielfach wieder hinzufügen
+    </button>
+  }
+</section>

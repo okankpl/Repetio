@@ -1,0 +1,42 @@
+<app-page-header backLink="/" backLabel="Fächer" title="Suche" />
+
+<!-- type="search": Handys zeigen eine Such-Taste, viele Browser ein Symbol zum Leeren -->
+<input
+  #field
+  type="search"
+  class="search"
+  placeholder="Frage oder Antwort durchsuchen …"
+  aria-label="Suchbegriff"
+  [value]="query()"
+  (input)="query.set(field.value)"
+/>
+
+@if (query().trim()) {
+  <h2 class="section-title" aria-live="polite">
+    @if (total() === 0) {
+      Keine Treffer
+    } @else if (total() > results().length) {
+      {{ results().length }} von {{ total() }} Treffern
+    } @else {
+      {{ total() }} Treffer
+    }
+  </h2>
+  @if (results().length > 0) {
+    <ul class="card list results">
+      @for (result of results(); track result.item.id) {
+        <li>
+          <a class="result" [routerLink]="result.link">
+            <span class="body">
+              <span class="text">{{ result.text }}</span>
+              <small>
+                {{ result.item.kind === 'flashcard' ? 'Karteikarte' : 'Quiz' }} ·
+                {{ result.context }}
+              </small>
+            </span>
+            <span class="status">{{ result.status }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+}

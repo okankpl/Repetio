@@ -1,0 +1,293 @@
+/* Globales Design-System: Farben als Variablen (hell/dunkel) und wiederverwendbare Bausteine.
+   Komponenten-Styles enthalten nur noch das, was für die jeweilige Komponente spezifisch ist. */
+
+:root {
+  /* light-dark(hell, dunkel): der Browser wählt den Wert passend zu `color-scheme` */
+  color-scheme: light dark;
+  --bg: light-dark(#f5f6f8, #0f1216);
+  --surface: light-dark(#ffffff, #181c22);
+  --surface-muted: light-dark(#f0f2f5, #222831);
+  --text: light-dark(#161a21, #e9ecf1);
+  --muted: light-dark(#5f6b7a, #9aa4b2);
+  --border: light-dark(#e2e6eb, #2b313a);
+  --primary: light-dark(#2f5bd3, #4f7be8);
+  --primary-soft: light-dark(#e8eefc, rgb(79 123 232 / 0.16));
+  --success: light-dark(#1d7a46, #4cc187);
+  --success-soft: light-dark(#e6f4ec, rgb(76 193 135 / 0.14));
+  --danger: light-dark(#c0392b, #f07a6e);
+  --danger-soft: light-dark(#fbeaea, rgb(240 122 110 / 0.14));
+  --warning: light-dark(#9a5b00, #f0b45a);
+  --warning-soft: light-dark(#fdf3e1, rgb(240 180 90 / 0.14));
+  /* Füllfarben für Buttons mit weißer Schrift – in beiden Modi gleich, damit der Kontrast stimmt */
+  --success-fill: #1d7a46;
+  --danger-fill: #c0392b;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow:
+    0 1px 2px light-dark(rgb(16 24 40 / 0.04), transparent),
+    0 4px 16px light-dark(rgb(16 24 40 / 0.05), transparent);
+}
+
+/* Fest gewähltes Design aus den Einstellungen (ohne Attribut gilt das System-Design) */
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+/* Wer in den Systemeinstellungen weniger Bewegung wünscht, bekommt keine Animationen */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* ---------- Layout ---------- */
+
+/* Inhalt mittig mit max. Breite; auf dem Handy Abstand zum Rand inkl. "Notch" (safe-area) */
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+}
+
+.card {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.section-title {
+  margin: 28px 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Karte mit Listenzeilen (Fächer, Kapitel, Einträge) */
+.list {
+  display: grid;
+  padding: 6px;
+}
+
+/* Hinweis, wenn eine Liste leer ist */
+.empty {
+  font-size: 14px;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* Elemente untereinander mit Abstand */
+.stack {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.card.stack {
+  margin-top: 0;
+}
+
+/* Zwei gleich breite Buttons nebeneinander */
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* Kleine Zeile über einem Titel oder einer Frage, z. B. "Quiz · Fach · Kapitel" */
+.eyebrow {
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Die eigentliche Frage einer Karte */
+.prompt {
+  font-size: 20px;
+  font-weight: 600;
+  white-space: pre-line;
+}
+
+/* Bereich mit Buttons unter einer Karte */
+.actions {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px; /* gut mit dem Daumen treffbar */
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--surface-muted);
+  color: inherit;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none; /* auch Links (<a class="btn">) sehen wie Buttons aus */
+  cursor: pointer;
+  transition: filter 0.15s;
+}
+
+.btn:hover:not(:disabled) {
+  filter: brightness(0.96);
+}
+
+.btn:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.btn-danger {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.btn-ghost {
+  min-height: 44px;
+  padding-inline: 10px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ---------- Formulare ---------- */
+
+input[type='text'],
+input[type='number'],
+textarea,
+select {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+/* Beschriftung über einem Feld */
+.field {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Das Feld selbst nicht fett – nur seine Beschriftung */
+.field input,
+.field textarea {
+  font-size: 16px; /* ab 16px zoomt Safari auf dem iPhone beim Antippen nicht hinein */
+  font-weight: 400;
+}
+
+/* Unsichtbar, aber für Screenreader und Klicks auf das zugehörige <label> vorhanden */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* Tastenkürzel-Hinweis; auf Touch-Geräten ohne Tastatur ausgeblendet */
+kbd {
+  padding: 0 5px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  opacity: 0.7;
+}
+
+@media (hover: none) {
+  kbd {
+    display: none;
+  }
+}

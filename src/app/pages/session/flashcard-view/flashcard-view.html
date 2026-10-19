@@ -1,0 +1,47 @@
+<article class="card">
+  <p class="eyebrow">Karteikarte · {{ context() }}</p>
+  <h2 class="prompt">{{ card().front }}</h2>
+
+  <!-- @if blendet Teile des Templates abhängig von einem Signal ein oder aus -->
+  @if (revealed()) {
+    @if (typed().trim()) {
+      <div class="answer yours">
+        <span class="answer-label">Deine Antwort</span>
+        <p>{{ typed() }}</p>
+      </div>
+    }
+    <div class="answer solution">
+      <span class="answer-label">Musterlösung</span>
+      <p>{{ card().back }}</p>
+    </div>
+  }
+</article>
+
+<div class="actions">
+  @if (revealed()) {
+    <p class="question">Wusstest du es?</p>
+    <div class="rating">
+      <!-- (click) ist eine Event-Bindung: ruft die Methode beim Klick auf -->
+      <button class="btn rate-wrong" (click)="rate(RATING.AGAIN)">
+        <span>Falsch <kbd>1</kbd></span>
+        <small>wieder in {{ intervals().again }}</small>
+      </button>
+      <button class="btn rate-right" (click)="rate(RATING.GOOD)">
+        <span>Richtig <kbd>2</kbd></span>
+        <small>wieder in {{ intervals().good }}</small>
+      </button>
+    </div>
+  } @else if (typeAnswer()) {
+    <!-- #answerBox ist eine Template-Referenz; [value] setzt den Inhalt, (input) liest Änderungen -->
+    <textarea
+      #answerBox
+      aria-label="Deine Antwort"
+      placeholder="Antwort in eigenen Worten …"
+      [value]="typed()"
+      (input)="typed.set(answerBox.value)"
+    ></textarea>
+    <button class="btn btn-primary" (click)="reveal()">Aufdecken <kbd>Enter</kbd></button>
+  } @else {
+    <button class="btn btn-primary" (click)="reveal()">Antwort zeigen <kbd>Leertaste</kbd></button>
+  }
+</div>

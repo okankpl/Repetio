@@ -1,0 +1,93 @@
+:host {
+  display: block;
+}
+
+.options {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  text-align: left;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s,
+    opacity 0.15s;
+}
+
+/* Hover nur vor dem Antworten; danach zeigen die Farben das Ergebnis */
+.option:hover:not(.is-correct, .is-wrong, .is-faded) {
+  border-color: var(--primary);
+}
+
+.letter {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface-muted);
+  border-radius: 50%;
+}
+
+.is-correct {
+  background: var(--success-soft);
+  border-color: var(--success);
+}
+
+.is-correct .letter {
+  color: #fff;
+  background: var(--success-fill);
+}
+
+.is-wrong {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+
+.is-wrong .letter {
+  color: #fff;
+  background: var(--danger-fill);
+}
+
+.is-faded {
+  opacity: 0.5;
+}
+
+.feedback {
+  margin-top: 16px;
+  padding: 12px 14px;
+  color: var(--danger);
+  background: var(--danger-soft);
+  border-radius: var(--radius-sm);
+}
+
+.feedback.correct {
+  color: var(--success);
+  background: var(--success-soft);
+}
+
+.feedback p {
+  margin: 4px 0;
+  color: var(--text);
+}
+
+.feedback small {
+  color: var(--muted);
+}

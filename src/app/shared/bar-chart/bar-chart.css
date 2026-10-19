@@ -1,0 +1,100 @@
+:host {
+  display: block;
+}
+
+/* Beschreibung der ausgewählten Säule bzw. Summe; feste Höhe, damit nichts springt */
+.readout {
+  min-height: 1.5em;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.plot {
+  position: relative;
+  height: 140px;
+  padding-left: 28px; /* Platz für die Skalenwerte */
+}
+
+.tick {
+  position: absolute;
+  left: 0;
+  font-size: 11px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.tick.top {
+  top: 0;
+}
+
+.tick.bottom {
+  bottom: 0;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px; /* Lücke in Flächenfarbe trennt benachbarte Säulen */
+  height: 100%;
+  /* Haarlinien: obere Skalenlinie und Grundlinie, zurückhaltend */
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Trefferfläche: die ganze Spalte, nicht nur die gemalte Säule */
+.slot {
+  display: flex;
+  flex: 1;
+  align-items: flex-end;
+  justify-content: center;
+  height: 100%;
+  border-radius: 4px 4px 0 0;
+  cursor: default;
+}
+
+.slot:focus-visible {
+  outline-offset: 0;
+}
+
+.bar {
+  width: 100%;
+  max-width: 24px;
+  background: var(--primary);
+  border-radius: 4px 4px 0 0; /* runde Enden oben, gerade an der Grundlinie */
+  transition: filter 0.15s;
+}
+
+.slot.active {
+  background: var(--surface-muted);
+}
+
+.slot.active .bar {
+  filter: brightness(1.15);
+}
+
+.labels {
+  display: flex;
+  gap: 2px;
+  margin-top: 4px;
+  padding-left: 28px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.labels span {
+  flex: 1;
+  overflow: visible;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.labels span:first-child {
+  text-align: left;
+}
+
+.labels span:last-child {
+  text-align: right;
+}

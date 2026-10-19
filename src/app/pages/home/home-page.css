@@ -1,0 +1,130 @@
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: max(20px, env(safe-area-inset-top)) 0 20px;
+}
+
+.logo {
+  flex: none;
+  width: 42px;
+  height: 42px;
+}
+
+.brand-text {
+  flex: 1;
+  min-width: 0;
+}
+
+h1 {
+  font-size: 22px;
+}
+
+.brand-text p {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.tools {
+  display: flex;
+  flex: none;
+}
+
+/* Auf sehr schmalen Handys ist für die Unterzeile neben den drei Symbolen kein Platz */
+@media (max-width: 400px) {
+  .brand-text p {
+    display: none;
+  }
+}
+
+.icon-link {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--muted);
+  border-radius: var(--radius-sm);
+}
+
+.icon-link:hover {
+  color: var(--text);
+  background: var(--surface-muted);
+}
+
+.icon-link svg {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.add {
+  margin-top: 12px;
+}
+
+.notice {
+  margin-bottom: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Erinnerung an die Sicherung */
+.reminder {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  background: var(--warning-soft);
+  border-color: transparent;
+}
+
+.reminder h2 {
+  font-size: 16px;
+  color: var(--warning);
+}
+
+.reminder p {
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+/* Lernserie unter der Tageskarte; die ganze Karte ist ein Link zur Statistik */
+.streak {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  padding-block: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.streak:hover {
+  background: var(--surface-muted);
+}
+
+.streak-number {
+  flex: none;
+  min-width: 44px;
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--primary);
+}
+
+.streak-text {
+  display: grid;
+  flex: 1;
+}
+
+.streak-text small {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.chevron {
+  font-size: 22px;
+  color: var(--muted);
+}

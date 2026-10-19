@@ -1,0 +1,128 @@
+<header class="brand">
+  <!-- Logo: zwei gestapelte Karten -->
+  <svg class="logo" viewBox="0 0 64 64" aria-hidden="true">
+    <rect width="64" height="64" rx="16" fill="var(--primary)" />
+    <rect
+      x="14"
+      y="17"
+      width="30"
+      height="36"
+      rx="6"
+      fill="#fff"
+      opacity="0.5"
+      transform="rotate(-10 29 35)"
+    />
+    <rect x="22" y="12" width="30" height="38" rx="6" fill="#fff" />
+    <rect x="28" y="22" width="18" height="4" rx="2" fill="var(--primary)" />
+    <rect x="28" y="31" width="13" height="4" rx="2" fill="var(--primary)" opacity="0.5" />
+  </svg>
+  <div class="brand-text">
+    <h1>Repetio</h1>
+    <p>Karteikarten und Quiz mit Wiederholungsplan</p>
+  </div>
+  <nav class="tools" aria-label="Werkzeuge">
+    <a class="icon-link" routerLink="/suche" aria-label="Suche" title="Suche">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <circle cx="11" cy="11" r="6" />
+        <path d="m20 20-4.5-4.5" />
+      </svg>
+    </a>
+    <a class="icon-link" routerLink="/statistik" aria-label="Statistik" title="Statistik">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 20V12M12 20V5M19 20v-9" />
+      </svg>
+    </a>
+    <a
+      class="icon-link"
+      routerLink="/einstellungen"
+      aria-label="Einstellungen"
+      title="Einstellungen"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1" />
+        <circle cx="15" cy="6" r="2" />
+        <circle cx="9" cy="12" r="2" />
+        <circle cx="17" cy="18" r="2" />
+      </svg>
+    </a>
+  </nav>
+</header>
+
+@if (dataSafety.reminderDue() && !reminderDismissed()) {
+  <section class="card reminder" aria-labelledby="reminder-title">
+    <h2 id="reminder-title">
+      @if (dataSafety.daysSinceBackup() === null) {
+        Noch keine Sicherung
+      } @else {
+        Letzte Sicherung vor {{ dataSafety.daysSinceBackup() }} Tagen
+      }
+    </h2>
+    <p>Dein Lernstand liegt nur auf diesem Gerät. Eine Sicherung schützt ihn vor Verlust.</p>
+    <div class="button-row">
+      <button class="btn btn-primary" (click)="backupNow()">Jetzt sichern</button>
+      <button class="btn btn-secondary" (click)="reminderDismissed.set(true)">Später</button>
+    </div>
+  </section>
+}
+
+<app-study-card heading="Heute" startLabel="Tägliche Runde starten" [overview]="today()" />
+
+@if (streak(); as streak) {
+  <a class="card streak" routerLink="/statistik">
+    <span class="streak-number">{{ streak.days }}</span>
+    <span class="streak-text">
+      <strong>{{ streak.days === 1 ? 'Tag' : 'Tage' }} in Folge gelernt</strong>
+      <small>heute {{ streak.reviewsToday }} Antworten · zur Statistik</small>
+    </span>
+    <span class="chevron" aria-hidden="true">›</span>
+  </a>
+}
+
+<h2 class="section-title">Fächer</h2>
+@if (message()) {
+  <p class="card notice" role="status">{{ message() }}</p>
+}
+@if (subjects().length > 0) {
+  <div class="card list">
+    <!-- @for wiederholt die Zeile für jedes Fach; track sagt Angular, woran es Einträge wiedererkennt -->
+    @for (entry of subjects(); track entry.subject.id) {
+      <app-progress-row
+        [link]="['/fach', entry.subject.id]"
+        [title]="entry.subject.name"
+        [badge]="initial(entry.subject.name)"
+        [detail]="entry.chapterCount + ' Kapitel'"
+        [learned]="entry.overview.learned"
+        [total]="entry.overview.total"
+        [due]="entry.overview.due"
+      />
+    }
+  </div>
+} @else {
+  <p class="card empty">Noch keine Fächer – leg unten dein erstes an.</p>
+}
+
+<div class="add">
+  @if (creating()) {
+    <app-name-form
+      placeholder="Name des Fachs, z. B. Mathematik"
+      submitLabel="Fach anlegen"
+      (saved)="addSubject($event)"
+      (cancelled)="creating.set(false)"
+    />
+  } @else {
+    <div class="button-row">
+      <button class="btn btn-secondary" (click)="creating.set(true)">+ Neues Fach</button>
+      <!-- Ein <label> öffnet beim Antippen das zugehörige, unsichtbare Datei-Feld -->
+      <label class="btn btn-secondary">
+        Fach aus Datei
+        <input
+          #file
+          class="visually-hidden"
+          type="file"
+          accept="application/json,.json"
+          (change)="addFromFile(file)"
+        />
+      </label>
+    </div>
+  }
+</div>

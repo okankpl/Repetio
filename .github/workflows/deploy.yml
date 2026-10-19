@@ -1,0 +1,79 @@
+# Prüft, testet und baut Repetio bei jedem Push auf main und veröffentlicht es auf GitHub Pages.
+# Einmalig nötig: im Repository unter Settings → Pages als "Source" die Option "GitHub Actions" wählen.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # erlaubt zusätzlich einen Start per Hand im Reiter "Actions"
+
+# Rechte, die das Veröffentlichen auf GitHub Pages braucht
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Läuft schon ein Deployment, wird es vom neueren abgelöst
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # npm ci installiert exakt die Versionen aus package-lock.json
+      - run: npm ci
+
+      - name: Formatierung prüfen
+        run: npm run format:check
+
+      # ESLint: Code- und Barrierefreiheitsregeln für TypeScript und Templates
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit-Tests
+        run: npm run test:ci
+
+      # Die App im Browser bedienen wie ein Mensch; nutzt das auf dem Runner installierte Chrome
+      - name: End-to-End-Tests
+        run: npm run e2e
+
+      # Bei Fehlern die Playwright-Aufzeichnung zum Nachvollziehen aufheben
+      - if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-traces
+          path: test-results
+          retention-days: 7
+
+      # GitHub Pages liefert die App unter /<repository-name>/ aus, nicht unter /.
+      # Der Build bricht ab, wenn das Größenbudget aus angular.json überschritten wird.
+      - name: Build
+        run: npx ng build --base-href "/${{ github.event.repository.name }}/"
+
+      # GitHub Pages kennt keine App-Routen: Ruft jemand z. B. /fach/swt direkt auf,
+      # liefert Pages die 404-Seite aus – als Kopie der App startet dann trotzdem die richtige Seite
+      - name: Fallback für direkt aufgerufene Unterseiten
+        run: cp dist/repetio/browser/index.html dist/repetio/browser/404.html
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist/repetio/browser
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

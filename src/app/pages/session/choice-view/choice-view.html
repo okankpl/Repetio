@@ -1,0 +1,38 @@
+<article class="card">
+  <p class="eyebrow">Quiz · {{ context() }}</p>
+  <h2 class="prompt">{{ question().question }}</h2>
+
+  <ul class="options">
+    <!-- @for wiederholt das Element; track sagt Angular, woran es Einträge wiedererkennt -->
+    @for (option of options(); track option.text; let i = $index) {
+      <li>
+        <button
+          class="option"
+          [class]="optionState(i)"
+          [attr.aria-pressed]="selected() === i"
+          (click)="choose(i)"
+        >
+          <span class="letter">{{ letters[i] }}</span>
+          <span>{{ option.text }}</span>
+        </button>
+      </li>
+    }
+  </ul>
+
+  @if (selected() !== null) {
+    <!-- role="status" lässt Screenreader die Rückmeldung automatisch vorlesen -->
+    <div class="feedback" [class.correct]="answeredCorrectly()" role="status">
+      <strong>{{ answeredCorrectly() ? 'Richtig!' : 'Leider falsch.' }}</strong>
+      <p>{{ question().explanation }}</p>
+      <small>
+        Wiederholung in {{ answeredCorrectly() ? intervals().good : intervals().again }}
+      </small>
+    </div>
+  }
+</article>
+
+@if (selected() !== null) {
+  <div class="actions">
+    <button class="btn btn-primary" (click)="next()">Weiter <kbd>Enter</kbd></button>
+  </div>
+}

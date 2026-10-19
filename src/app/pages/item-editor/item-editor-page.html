@@ -1,0 +1,80 @@
+<app-page-header
+  [backLink]="backLink()"
+  [backLabel]="chapter()?.title ?? 'Kapitel'"
+  [title]="notFound() ? 'Eintrag nicht gefunden' : title()"
+/>
+
+@if (notFound()) {
+  <p class="card empty">Diesen Eintrag gibt es nicht (mehr).</p>
+} @else if (itemKind() === 'flashcard') {
+  <!-- [formGroup] verbindet das Formular mit cardForm; formControlName ein Feld mit einem Eintrag darin -->
+  <form class="card editor" [formGroup]="cardForm" (ngSubmit)="save()">
+    <label class="field">
+      Frage
+      <textarea #firstField formControlName="front" rows="3"></textarea>
+    </label>
+    @if (showError(cardForm.controls.front)) {
+      <p class="error">Bitte eine Frage eingeben.</p>
+    }
+    <label class="field">
+      Antwort
+      <textarea formControlName="back" rows="5"></textarea>
+    </label>
+    @if (showError(cardForm.controls.back)) {
+      <p class="error">Bitte eine Antwort eingeben.</p>
+    }
+    <ng-container *ngTemplateOutlet="buttons" />
+  </form>
+} @else {
+  <form class="card editor" [formGroup]="quizForm" (ngSubmit)="save()">
+    <label class="field">
+      Frage
+      <textarea #firstField formControlName="question" rows="3"></textarea>
+    </label>
+    @if (showError(quizForm.controls.question)) {
+      <p class="error">Bitte eine Frage eingeben.</p>
+    }
+    <label class="field correct">
+      Richtige Antwort
+      <input type="text" formControlName="correct" />
+    </label>
+    @if (showError(quizForm.controls.correct)) {
+      <p class="error">Bitte die richtige Antwort eingeben.</p>
+    }
+    <fieldset>
+      <legend>Falsche Antworten <small>(mindestens eine)</small></legend>
+      <input type="text" formControlName="wrong1" aria-label="Falsche Antwort 1" />
+      <input type="text" formControlName="wrong2" aria-label="Falsche Antwort 2 (optional)" />
+      <input type="text" formControlName="wrong3" aria-label="Falsche Antwort 3 (optional)" />
+    </fieldset>
+    @if (showError(quizForm.controls.wrong1)) {
+      <p class="error">Bitte mindestens eine falsche Antwort eingeben.</p>
+    }
+    <label class="field">
+      Begründung <small>(optional, wird nach dem Antworten gezeigt)</small>
+      <textarea formControlName="explanation" rows="3"></textarea>
+    </label>
+    <ng-container *ngTemplateOutlet="buttons" />
+  </form>
+}
+
+<!-- Gemeinsame Buttons beider Formulare; ngTemplateOutlet setzt das Template oben zweimal ein -->
+<ng-template #buttons>
+  @if (existing()) {
+    <button class="btn btn-primary" type="submit">Speichern</button>
+  } @else {
+    <div class="button-row">
+      <button class="btn btn-secondary" type="button" (click)="save(true)">
+        Speichern &amp; nächste
+      </button>
+      <button class="btn btn-primary" type="submit">Speichern</button>
+    </div>
+    @if (savedCount() > 0) {
+      <p class="saved" role="status">{{ savedCount() }} gespeichert – weiter mit der nächsten.</p>
+    }
+  }
+</ng-template>
+
+@if (existing()) {
+  <button class="btn btn-danger btn-block delete" (click)="delete()">Eintrag löschen</button>
+}

@@ -1,0 +1,66 @@
+<!-- "as subject" speichert den Wert unter einem Namen; im @if-Block ist er sicher vorhanden -->
+@if (subject(); as subject) {
+  <app-page-header backLink="/" backLabel="Fächer" eyebrow="Fach" [title]="subject.name" />
+
+  <app-study-card
+    heading="Dieses Fach"
+    startLabel="Fach lernen"
+    [overview]="overview()"
+    [scope]="scope()"
+  />
+
+  <h2 class="section-title">Kapitel</h2>
+  @if (chapters().length > 0) {
+    <div class="card list">
+      @for (entry of chapters(); track entry.chapter.id) {
+        <app-progress-row
+          [link]="['/fach', subject.id, 'kapitel', entry.chapter.id]"
+          [title]="entry.chapter.title"
+          [badge]="'' + entry.nr"
+          [learned]="entry.overview.learned"
+          [total]="entry.overview.total"
+          [due]="entry.overview.due"
+        />
+      }
+    </div>
+  } @else {
+    <p class="card empty">Noch keine Kapitel – leg unten das erste an.</p>
+  }
+
+  <div class="stack">
+    @if (mode() === 'add-chapter') {
+      <app-name-form
+        placeholder="Titel des Kapitels"
+        submitLabel="Kapitel anlegen"
+        (saved)="addChapter($event)"
+        (cancelled)="mode.set('idle')"
+      />
+    } @else {
+      <button class="btn btn-secondary btn-block" (click)="mode.set('add-chapter')">
+        + Neues Kapitel
+      </button>
+    }
+  </div>
+
+  <h2 class="section-title">Fach verwalten</h2>
+  @if (mode() === 'rename') {
+    <app-name-form
+      placeholder="Name des Fachs"
+      submitLabel="Umbenennen"
+      [value]="subject.name"
+      (saved)="rename($event)"
+      (cancelled)="mode.set('idle')"
+    />
+  } @else {
+    <div class="stack">
+      <button class="btn btn-secondary" (click)="share()">Fach als Datei teilen</button>
+      <div class="button-row">
+        <button class="btn btn-secondary" (click)="mode.set('rename')">Umbenennen</button>
+        <button class="btn btn-danger" (click)="delete()">Fach löschen</button>
+      </div>
+    </div>
+  }
+} @else {
+  <app-page-header backLink="/" backLabel="Fächer" title="Fach nicht gefunden" />
+  <p class="card empty">Dieses Fach gibt es nicht (mehr).</p>
+}
